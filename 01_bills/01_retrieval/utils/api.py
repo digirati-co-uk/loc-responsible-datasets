@@ -35,21 +35,18 @@ class LoCBillsAPI(object):
             "",
         )
         url = urllib.parse.urlunsplit(url_components)
+        logger.debug(f"GET: {url=} {qs=}")
         qs["api_key"] = self.api_key
         response = self.session.get(url, params=qs, headers=json_headers)
         response.raise_for_status()
         resp_json = response.json()
         return resp_json
 
-    def get_congress_bills_page(self, congress, page_offset):
+    def get_congress_bills_page(self, congress, page_offset, page_limit):
         path = f"bill/{congress}"
-        qs = {"limit": 250, "offset": page_offset}
+        qs = {"limit": page_limit, "offset": page_offset}
         resp = self.get_endpoint_json(path, qs)
         return resp
-
-        offset = urllib.parse.parse_qs(urllib.parse.urlsplit(next_url).query).get(
-            "offset"
-        )[0]
 
     def get_bill(self, congress, house, number):
         path = f"bill/{congress}/{house}/{number}"
