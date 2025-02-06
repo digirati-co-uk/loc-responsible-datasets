@@ -1,68 +1,70 @@
+#!/usr/bin/env python3
+
 import typer
-import json
-import pathlib
 import logging
 
-from utils.loc_bills_api import (
-    LoCBillsAPI,
+from typing_extensions import Annotated
+from pathlib import Path
+from utils.fetch_store import (
+    fetch_and_store_bills_from_source_page,
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-logger.addHandler(ch)
 
-SUBFIELDS = {"subjects": "subjects", "summaries": "summaries", "textVersions": "text"}
-
-
-def get_page_bills_data(
-    api_url: str = "https://api.congress.gov/v3/",
-    output_directory: pathlib.Path = pathlib.Path("../local_data/bills/source_data"),
-    api_key: str = None,
-    source_path: pathlib.Path = None,
+def get_bills_from_source_page(
+    api_key: Annotated[
+        str,
+        typer.Argument(
+            help="API key for the Congress.gov API instance",
+            envvar="CONGRESS_GOV_API_KEY",
+        ),
+    ],
+    api_url: Annotated[
+        str, typer.Option(help="Base url for the Congress.gov API instance.")
+    ] = "https://api.congress.gov/v3/",
+    source_path: Annotated[
+        Path,
+        typer.Option(
+            help="Location of JSON file containing the source page with list of bills."
+        ),
+    ] = Path("../local_data/source_pages/111_0.json"),
+    output_directory: Annotated[
+        Path, typer.Option(help="Location to store the bill data fetched from the API.")
+    ] = Path("../local_data/source_bills"),
+    overwrite: Annotated[
+        bool,
+        typer.Option(help="Whether to refetch data and overwrite existing bill files"),
+    ] = False,
+    log_level: Annotated[
+        str,
+        typer.Option(
+            help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)"
+        ),
+    ] = "INFO",
 ):
-    if not output_directory:
-        pass
-    if not api_key:
-        pass
+    """
+    Local CLI Wrapper for the `fetch_and_store_bills_from_source_page` function.
 
-    source_data = json.load(source_path.open("r"))
+    """
+    log_level = log_level.upper()
+    level_enum = getattr(logging, log_level, None)
+    if not isinstance(level_enum, int):
+        raise typer.BadParameter(f"Invalid log level: {log_level}")
+    logging.basicConfig(
+        level=level_enum,
+        format="%(asctime)s - %(name)s.%(funcName)s:%(lineno)d - %(levelname)s - %(message)s",
+    )
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
 
-    output_directory.mkdir(parents=True, exist_ok=True)
-    bills_api = LoCBillsAPI(api_url, api_key)
-    for bill_data in source_data.get("bills"):
-        congress = bill_data.get("congress")
-        house = bill_data.get("type").lower()
-        bill_no = bill_data.get("number")
-        bill_path = f"{congress}/{house}/{bill_no}"
-        logger.info(f"Fetching {bill_path}")
-        full_bill_data = bills_api.get_bill(congress, house, bill_no)
-        bill_output_dir = output_directory / bill_path
-        bill_output_dir.mkdir(parents=True, exist_ok=True)
-        bill_output_path = bill_output_dir / "bill.json"
-        json.dump(full_bill_data, bill_output_path.open("w"), indent=2)
-        for subfield_name, url_name in SUBFIELDS.items():
-
-            if full_bill_data.get("bill").get(subfield_name):
-                logger.info(f"Fetching {bill_path} - {url_name}")
-                subfield_data = bills_api.get_bill_subfield(
-                    congress, house, bill_no, url_name
-                )
-                subfield_output_path = bill_output_dir / f"{url_name}.json"
-                json.dump(subfield_data, subfield_output_path.open("w"), indent=2)
-
-                if subfield_name == "textVersions":
-                    for item in subfield_data.get("textVersions"):
-                        for format in item.get("formats"):
-                            if format.get("type") == "Formatted XML":
-                                url = format.get("url")
-                                logger.info(f"Fetching {bill_path} - {url}")
-                                file_name = url.split("/")[-1]
-                                bill_text = bills_api.get_bill_text(url)
-                                bill_text_path = bill_output_dir / file_name
-                                bill_text_path.write_text(bill_text)
+    fetch_and_store_bills_from_source_page(
+        api_url=api_url,
+        api_key=api_key,
+        source_path=source_path,
+        output_directory=output_directory,
+        overwrite=overwrite,
+    )
 
 
 if __name__ == "__main__":
-    typer.run(get_page_bills_data)
+    typer.run(get_bills_from_source_page)

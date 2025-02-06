@@ -59,6 +59,7 @@ class LoCBillsAPI(object):
         return resp
 
     def get_bill_text(self, url):
+        logger.debug(f"GET: {url=}")
         response = self.session.get(url)
         response.raise_for_status()
         resp_data = response.text
