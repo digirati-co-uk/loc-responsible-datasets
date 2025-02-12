@@ -21,15 +21,18 @@ def get_bills_from_source_page(
     api_url: Annotated[
         str, typer.Option(help="Base url for the Congress.gov API instance.")
     ] = "https://api.congress.gov/v3/",
-    source_path: Annotated[
-        Path,
+    source_file: Annotated[
+        str,
         typer.Option(
-            help="Location of JSON file containing the source page with list of bills."
+            help="Location of JSON file containing the source page with list of bills. Can be a s3 url (e.g. s3://loc-responsible-datasets-source-data/01_bills/source_pages/111_0.json) or a directory path."
         ),
-    ] = Path("../local_data/source_pages/111_0.json"),
-    output_directory: Annotated[
-        Path, typer.Option(help="Location to store the bill data fetched from the API.")
-    ] = Path("../local_data/source_bills"),
+    ] = "../local_data/01_bills/source_pages/111_0.json",
+    output_location: Annotated[
+        str,
+        typer.Option(
+            help="Location to store the bill data fetched from the API. Can be a s3 url (e.g. s3://loc-responsible-datasets-source-data/01_bills/source_bills) or a directory path."
+        ),
+    ] = "../local_data/01_bills/source_bills",
     overwrite: Annotated[
         bool,
         typer.Option(help="Whether to refetch data and overwrite existing bill files"),
@@ -60,8 +63,8 @@ def get_bills_from_source_page(
     fetch_and_store_bills_from_source_page(
         api_url=api_url,
         api_key=api_key,
-        source_path=source_path,
-        output_directory=output_directory,
+        source_file=source_file,
+        output_location=output_location,
         overwrite=overwrite,
     )
 

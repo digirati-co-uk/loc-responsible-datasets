@@ -12,6 +12,9 @@ json_headers = {
 
 logger = logging.getLogger(__name__)
 
+logger = logging.getLogger("ray")
+logger.setLevel(logging.DEBUG)
+
 
 class LoCBillsAPI(object):
     def __init__(self, api_url, api_key):

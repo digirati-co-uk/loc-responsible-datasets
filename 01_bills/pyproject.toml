@@ -3,8 +3,10 @@ name = "loc-responsible-datasets-01-bills"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
+    "fsspec>=2025.2.0",
+    "ray[default]>=2.42.1",
     "requests>=2.32.3",
     "s3fs>=2025.2.0",
     "typer>=0.15.1",
