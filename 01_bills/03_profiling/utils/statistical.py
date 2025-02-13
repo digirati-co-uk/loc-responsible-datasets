@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from typing import Union
 from itertools import combinations
 
 import scipy.stats as stats
@@ -9,7 +10,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def get_dataframe_copy(dataframe, attributes):
+def get_dataframe_copy(dataframe: pd.DataFrame, attributes: Union[str, list]):
+    """
+    Returns a deep copy of an input DataFrame such that the original dataframe is preserved and untouched.
+    Modifications are to be applied to returned deep copy.
+    """
     if isinstance(attributes, str):
         if isinstance(dataframe.iloc[0][attributes], list):
             dataframe_copy = dataframe.explode(attributes, ignore_index=True)
@@ -126,7 +131,7 @@ def plot_gini_indexes(dataframe: pd.DataFrame, attributes: list):
 
 def calculate_entropy(dataframe: pd.DataFrame, attribute: str):
     """
-    Takes dataframe and attribute and returns the (shannon - log2) entropy
+    Returns the (shannon - log2) entropy for an attribute
     Higher entropy -> more diverse distribution
     Lower entropy -> more dominated by a single category
     """
@@ -139,9 +144,11 @@ def calculate_entropy(dataframe: pd.DataFrame, attribute: str):
 
 
 def plot_entropies(dataframe: pd.DataFrame, attributes: list):
+    """
+    Returns bar chart to display (Shannon) entropies for all attributes givens
+    """
     entropies = {attr: calculate_entropy(dataframe, attr) for attr in attributes}
 
-    # Convert to DataFrame for plotting
     entropy_df = pd.DataFrame(list(entropies.items()), columns=["Attribute", "Entropy"])
 
     # Plot
@@ -232,6 +239,9 @@ def calculate_cramers_v(
 
 
 def plot_cramers_v_heatmap(dataframe, attributes):
+    """
+    Returns heat map to display Cramer's V and relationship strength between all attributes
+    """
     cramers_v_matrix = pd.DataFrame(index=attributes, columns=attributes)
     label_matrix = pd.DataFrame(index=attributes, columns=attributes, dtype=str)
 

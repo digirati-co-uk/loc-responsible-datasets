@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import collections
 
+from typing import Union
 from itertools import combinations
 from collections import Counter
 
@@ -9,7 +10,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def get_dataframe_copy(dataframe, attributes):
+def get_dataframe_copy(dataframe: pd.DataFrame, attributes: Union[str, list]):
+    """
+    Returns a deep copy of an input DataFrame such that the original dataframe is preserved and untouched.
+    Modifications are to be applied to returned deep copy.
+    """
     if isinstance(attributes, str):
         if isinstance(dataframe.iloc[0][attributes], list):
             dataframe_copy = dataframe.explode(attributes, ignore_index=True)
@@ -27,6 +32,9 @@ def get_dataframe_copy(dataframe, attributes):
 
 
 def count_bar_plot(dataframe: pd.DataFrame, attribute: str, n: int = None):
+    """
+    Returns a bar plot for the counts for the given attribute in a DataFrame
+    """
     dataframe_copy = get_dataframe_copy(dataframe=dataframe, attributes=attribute)
     count_df = pd.DataFrame(dataframe_copy[attribute].value_counts())
     if n:
@@ -44,6 +52,10 @@ def count_bar_plot(dataframe: pd.DataFrame, attribute: str, n: int = None):
 def calculate_count_distribution(
     dataframe: pd.DataFrame, attribute: str, n: int = None
 ):
+    """
+    Returns simple summary statistics for the count distribution of an attribute
+    If n is given then it also returns the top n more common categories
+    """
     dataframe_copy = get_dataframe_copy(dataframe, attribute)
 
     series = dataframe_copy[attribute]
@@ -56,6 +68,9 @@ def calculate_count_distribution(
 
 
 def frequency_bar_plot(dataframe: pd.DataFrame, attribute: str = "legislativeSubjects"):
+    """
+    Returns a bar plot for the frequency of counts of a attribute which has values in the form of a list
+    """
     if type(dataframe.iloc[0][attribute]) != list:
         print(f"No frequencies to calculate for {attribute}")
         return
@@ -79,11 +94,17 @@ def frequency_bar_plot(dataframe: pd.DataFrame, attribute: str = "legislativeSub
     )
     plt.ylabel("Number of Bills")
     plt.xlabel(f"Number of {attribute}")
-    plt.title(f"Frequency of {attribute}")  # Counts of Categorical Values
+    plt.title(f"Frequency of {attribute}")
     plt.show()
 
 
 def calculate_frequency_distribution(dataframe: pd.DataFrame, attribute: str):
+    """
+    Returns summary statistics for frequency distribution
+    """
+    if type(dataframe.iloc[0][attribute]) != list:
+        print(f"No frequency distribution to calculate for {attribute}")
+        return
     dataframe_copy = get_dataframe_copy(dataframe, attribute)
 
     series = dataframe_copy[attribute]
@@ -93,6 +114,9 @@ def calculate_frequency_distribution(dataframe: pd.DataFrame, attribute: str):
 
 
 def cross_tabulation_heatmap(dataframe: pd.DataFrame, attributes: list, n: int = None):
+    """
+    Returns a heatmap to display the cross tabulation (pairwise analysis) between two attributes
+    """
     dataframe_copy = get_dataframe_copy(dataframe, attributes)
 
     attr1, attr2 = attributes
