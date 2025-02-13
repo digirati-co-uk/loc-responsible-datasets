@@ -1,0 +1,1 @@
+01_get_compiled_subjects_dataframe.py should be run following from the scripts in retrieval step from 01_retrieval
