@@ -6,31 +6,21 @@ import logging
 from typing_extensions import Annotated
 from pathlib import Path
 
-# from utils.fetch_store import (
-#     fetch_and_store_bills_from_source_page,
-# )
+from utils.status import (
+    congress_bill_status_dataframes,
+)
 
 
-def source_data_report(
-    source_directory: Path,
-    output_directory: Path,
-):
-    pages_dir = source_directory / "source_pages"
-    bills_dir = source_directory / "source_bills"
-    for page_path in pages_dir.glob("*.json"):
-        print(page_path)
-
-
-def create_source_data_report(
-    source_directory: Annotated[
-        Path,
+def create_bill_status_dataframes(
+    source_location: Annotated[
+        str,
         typer.Option(
-            help="Location containing `source_bills` and `source_pages` directories created by other scripts."
+            help="Location containing source pages and source bills created by other scripts."
         ),
-    ] = Path("../local_data/"),
-    output_directory: Annotated[
-        Path, typer.Option(help="Location to store the generated report.")
-    ] = Path("../local_data/"),
+    ] = "s3://loc-responsible-datasets-source-data/01_bills/",
+    output_location: Annotated[
+        str, typer.Option(help="Location to store the generated dataframes.")
+    ] = "./reports/bills/",
     log_level: Annotated[
         str,
         typer.Option(
@@ -54,11 +44,11 @@ def create_source_data_report(
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
 
-    source_data_report(
-        source_directory=source_directory,
-        output_directory=output_directory,
+    congress_bill_status_dataframes(
+        source_location=source_location,
+        output_location=output_location,
     )
 
 
 if __name__ == "__main__":
-    typer.run(create_source_data_report)
+    typer.run(create_bill_status_dataframes)

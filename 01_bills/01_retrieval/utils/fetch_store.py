@@ -7,19 +7,22 @@ import fsspec
 
 from .api import (
     LoCBillsAPI,
+    BILL_SUBFIELDS,
+    TEXT_SUBFIELD,
+    TEXT_TYPES,
 )
-
-BILL_SUBFIELDS = {
-    "subjects": "subjects",
-    "summaries": "summaries",
-    "textVersions": "text",
-}
-TEXT_SUBFIELD = "textVersions"
+from .location import (
+    init_location,
+)
+from .status import (
+    is_bill_processed,
+    is_page_processed,
+)
 
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger("ray")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 def _initialise_source_page_status(
@@ -80,24 +83,6 @@ def fetch_and_store_bills_source_page(
         )
         logger.debug(f"Stored page status JSON: ({dest_path=})")
     return dest_path
-
-
-def init_location(
-    location: str, is_dir: bool = False, is_dest: bool = False
-) -> tuple[fsspec.filesystem, str]:
-    if is_dir:
-        location = location.rstrip("/") + "/"
-    if location.startswith("s3://"):
-        fs = fsspec.filesystem("s3")
-    else:
-        fs = fsspec.filesystem("file")
-        if is_dest:
-            _path = Path(location)
-            if is_dir:
-                _path.mkdir(parents=True, exist_ok=True)
-            else:
-                _path.parent.mkdir(parents=True, exist_ok=True)
-    return fs, location
 
 
 def fetch_and_store_congress_bills_source_pages(
@@ -171,20 +156,26 @@ def fetch_and_store_subfield_data(
                 logger.debug(f"Skipping existing subfield: {subfield_output_path}")
                 return status
         else:
-            subfield_json = bills_api.get_bill_subfield(
-                congress, house, bill_number, url_name
-            )
-            json.dump(
-                subfield_json, filesystem.open(subfield_output_path, "w"), indent=2
-            )
-            logger.debug(f"Stored bill subfield JSON: {subfield_output_path}")
-            status["location"] = subfield_output_path
-            status["processed"] = True
+            try:
+                subfield_json = bills_api.get_bill_subfield(
+                    congress, house, bill_number, url_name
+                )
+                json.dump(
+                    subfield_json, filesystem.open(subfield_output_path, "w"), indent=2
+                )
+                logger.debug(f"Stored bill subfield JSON: {subfield_output_path}")
+                status["location"] = subfield_output_path
+                status["processed"] = True
+            except Exception as e:
+                status["processed"] = False
+                status["exception"] = str(e)
+                logger.info(f"Bill subfield error: ({url_name}, {str(e)})")
+                return status
         if subfield_name == TEXT_SUBFIELD:
             status["bill_texts"] = status.get("bill_texts", {})
             for text_version in subfield_json.get("textVersions"):
                 for format in text_version.get("formats"):
-                    if format.get("type") == "Formatted XML":
+                    if format.get("type").strip() in TEXT_TYPES:
                         url = format.get("url")
                         text_file_name = url.split("/")[-1]
                         text_status = status.get("bill_texts", {}).get(
@@ -198,12 +189,20 @@ def fetch_and_store_subfield_data(
                                 f"Skipping existing bill text: {bill_text_path}"
                             )
                         else:
-                            bill_text = bills_api.get_bill_text(url)
-                            with filesystem.open(bill_text_path, "w") as f_out:
-                                f_out.write(bill_text)
-                            logger.debug(f"Stored bill text: {bill_text_path}")
-                            text_status["location"] = bill_text_path
-                            text_status["processed"] = True
+                            try:
+                                bill_text = bills_api.get_bill_text(url)
+                                with filesystem.open(bill_text_path, "w") as f_out:
+                                    f_out.write(bill_text)
+                                logger.debug(f"Stored bill text: {bill_text_path}")
+                                text_status["location"] = bill_text_path
+                                text_status["processed"] = True
+                            except Exception as e:
+                                text_status["processed"] = False
+                                text_status["exception"] = str(e)
+                                logger.info(
+                                    f"Bill text error: ({bill_text_path}, {str(e)})"
+                                )
+
                         status["bill_texts"][text_file_name] = text_status
         return status
 
@@ -227,6 +226,7 @@ def fetch_and_store_bill_data(
     logger.info(f"Processing Bill: ({congress=}, {house=}, {bill_number=})")
 
     status = {}
+    status["subfields"] = status.get("subfields", {})
     bill_path = f"{congress}/{house}/{bill_number}"
     filesystem, bill_output = init_location(
         f"{output_location}{bill_path}", is_dir=True, is_dest=True
@@ -237,11 +237,15 @@ def fetch_and_store_bill_data(
         bill_json = json.load(filesystem.open(bill_output_path, "r"))
         status["bill"] = {"processed": True, "location": bill_output_path}
     else:
-        bill_json = bills_api.get_bill(congress, house, bill_number)
-        json.dump(bill_json, filesystem.open(bill_output_path, "w"), indent=2)
-        logger.debug(f"Stored base bill JSON: {bill_output_path}")
-        status["bill"] = {"processed": True, "location": bill_output_path}
-    status["subfields"] = status.get("subfields", {})
+        try:
+            bill_json = bills_api.get_bill(congress, house, bill_number)
+            json.dump(bill_json, filesystem.open(bill_output_path, "w"), indent=2)
+            logger.debug(f"Stored base bill JSON: {bill_output_path}")
+            status["bill"] = {"processed": True, "location": bill_output_path}
+        except Exception as e:
+            logger.info(f"Bill error: ({bill_output_path}, {str(e)})")
+            status["bill"] = {"processed": False, "exception": str(e)}
+            return status
     for subfield_name in BILL_SUBFIELDS.keys():
         subfield_status = fetch_and_store_subfield_data(
             bills_api=bills_api,
@@ -264,17 +268,18 @@ def fetch_and_store_bills_from_source_page(
     source_file: str,
     output_location: str,
     overwrite: bool,
+    status_data: dict = {},
 ):
 
     source_filesystem, source_file = init_location(source_file)
     dest_filesystem, output_location = init_location(
         output_location, is_dir=True, is_dest=True
     )
-
-    source_status_file = source_file.replace(".json", ".status.json")
-
+    logger.info(f"Processing page: {source_file}")
     source_data = json.load(source_filesystem.open(source_file, "r"))
-    status_data = json.load(source_filesystem.open(source_status_file, "r"))
+    source_status_file = source_file.replace(".json", ".status.json")
+    if not status_data:
+        status_data = json.load(source_filesystem.open(source_status_file, "r"))
 
     bills_api = LoCBillsAPI(api_url, api_key)
     page_bills = source_data.get("bills")
@@ -285,18 +290,25 @@ def fetch_and_store_bills_from_source_page(
         house = bill_data.get("type").lower()
         bill_number = int(bill_data.get("number"))
         bill_path = f"{congress}/{house}/{bill_number}"
-        bill_status = fetch_and_store_bill_data(
-            bills_api=bills_api,
-            congress=congress,
-            house=house,
-            bill_number=bill_number,
-            output_location=output_location,
-            overwrite=overwrite,
-        )
-        status_data["bills"][bill_path] = bill_status
-        json.dump(
-            status_data, source_filesystem.open(source_status_file, "w"), indent=2
-        )
+
+        if (
+            not is_bill_processed(status_data.get("bills", {}).get(bill_path))
+            or overwrite
+        ):
+            bill_status = fetch_and_store_bill_data(
+                bills_api=bills_api,
+                congress=congress,
+                house=house,
+                bill_number=bill_number,
+                output_location=output_location,
+                overwrite=overwrite,
+            )
+            status_data["bills"][bill_path] = bill_status
+            json.dump(
+                status_data, source_filesystem.open(source_status_file, "w"), indent=2
+            )
+        else:
+            logger.info(f"Bill already processed: {bill_path}")
 
 
 def fetch_and_store_congress_bills(
@@ -321,3 +333,55 @@ def fetch_and_store_congress_bills(
                 output_location=output_location,
                 overwrite=overwrite,
             )
+
+
+def fetch_and_store_congress_bills_by_status(
+    api_url: str,
+    api_key: str,
+    congress: int,
+    source_location: str,
+    output_location: str,
+    overwrite: bool,
+):
+    source_filesystem, source_dir = init_location(source_location, is_dir=True)
+    source_pages = source_filesystem.glob(f"{source_dir}{congress}_*.json")
+
+    status_pages = filter(lambda x: x.endswith("status.json"), source_pages)
+    for page in status_pages:
+
+        source_page = page.replace(".status.json", ".json")
+        status_data = json.load(source_filesystem.open(page, "r"))
+        if is_page_processed(status_data):
+            logger.info(f"Skipping processed page: {source_page}")
+        else:
+            s3_page_uri = f"s3://{source_page}"
+            fetch_and_store_bills_from_source_page(
+                api_url=api_url,
+                api_key=api_key,
+                source_file=s3_page_uri,
+                output_location=output_location,
+                overwrite=overwrite,
+                status_data=status_data,
+            )
+
+
+def update_source_pages_subfield_processed_status(
+    congress: int,
+    subfield: str,
+    subfield_status: bool,
+    source_location: str,
+):
+    source_filesystem, source_dir = init_location(source_location, is_dir=True)
+    status_pages = source_filesystem.glob(f"{source_dir}{congress}_*.status.json")
+    for page in status_pages:
+        logger.info(f"Updating status {subfield}={subfield_status} in {page}")
+        status_data = json.load(source_filesystem.open(page, "r"))
+        updates = []
+        for bill_key, status in status_data.get("bills").items():
+            if subfield_data := status.get("subfields", {}).get(subfield):
+                updates.append(bill_key)
+        for bill_key in updates:
+            status_data["bills"][bill_key]["subfields"][subfield][
+                "processed"
+            ] = subfield_status
+        json.dump(status_data, source_filesystem.open(page, "w"), indent=2)

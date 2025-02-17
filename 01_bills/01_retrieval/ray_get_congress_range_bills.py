@@ -15,11 +15,11 @@ def ray_wrapper(log_level: str, **kwargs):
         fetch_and_store_congress_bills_by_status,
     )
 
-    logger.debug("Running fetch_and_store_congress_bills_by_status.")
+    logger.debug(f"Running fetch_and_store_congress_bills_by_status")
     fetch_and_store_congress_bills_by_status(**kwargs)
 
 
-def get_congress_bills(
+def get_congress_range_bills(
     api_key: Annotated[
         str,
         typer.Argument(
@@ -30,9 +30,12 @@ def get_congress_bills(
     api_url: Annotated[
         str, typer.Option(help="Base url for the Congress.gov API instance.")
     ] = "https://api.congress.gov/v3/",
-    congress: Annotated[
-        int, typer.Option(help="Congress to fetch and store bill pages for")
-    ] = 111,
+    start: Annotated[
+        int, typer.Option(help="First Congress in range to create jobs for.")
+    ] = 100,
+    end: Annotated[
+        int, typer.Option(help="Last Congress in range to create jobs for.")
+    ] = 118,
     source_location: Annotated[
         str,
         typer.Option(
@@ -58,17 +61,21 @@ def get_congress_bills(
 ):
     ray.init()
 
-    result = ray_wrapper.remote(
-        api_url=api_url,
-        api_key=api_key,
-        congress=congress,
-        source_location=source_location,
-        output_location=output_location,
-        overwrite=overwrite,
-        log_level=log_level,
-    )
+    result = []
+    for congress in range(start, end + 1):
+        result.append(
+            ray_wrapper.remote(
+                api_url=api_url,
+                api_key=api_key,
+                congress=congress,
+                source_location=source_location,
+                output_location=output_location,
+                overwrite=overwrite,
+                log_level=log_level,
+            )
+        )
     ray.get(result)
 
 
 if __name__ == "__main__":
-    typer.run(get_congress_bills)
+    typer.run(get_congress_range_bills)
