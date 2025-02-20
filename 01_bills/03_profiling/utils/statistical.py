@@ -62,7 +62,11 @@ def calculate_class_ratio(dataframe: pd.DataFrame, attribute: str, n: int = 3):
 
 
 def analyze_bias_crosstab(
-    dataframe: pd.DataFrame, attributes: list, n: int = None, normalize: bool = True
+    dataframe: pd.DataFrame,
+    attributes: list,
+    n: int = None,
+    normalize: bool = True,
+    figsize: tuple = (10, 10),
 ):
     dataframe_copy = get_dataframe_copy(dataframe, attributes)
 
@@ -83,7 +87,7 @@ def analyze_bias_crosstab(
         frequency_matrix = frequency_matrix.div(frequency_matrix.sum(axis=1), axis=0)
 
     # Plot heatmap
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=figsize)
     sns.heatmap(frequency_matrix, cmap="viridis", annot=True)
     plt.title(f"{attr1} vs. {attr2} Co-occurence Heatmap")
     plt.xlabel(f"{attr2}")

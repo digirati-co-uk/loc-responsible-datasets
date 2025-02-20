@@ -31,7 +31,9 @@ def get_dataframe_copy(dataframe: pd.DataFrame, attributes: Union[str, list]):
     return dataframe_copy
 
 
-def count_bar_plot(dataframe: pd.DataFrame, attribute: str, n: int = None):
+def count_bar_plot(
+    dataframe: pd.DataFrame, attribute: str, n: int = None, figsize: tuple = (10, 6)
+):
     """
     Returns a bar plot for the counts for the given attribute in a DataFrame
     """
@@ -41,7 +43,7 @@ def count_bar_plot(dataframe: pd.DataFrame, attribute: str, n: int = None):
         count_df = count_df.iloc[:n]
 
     # Plot bar plot
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=figsize)
     sns.barplot(x="count", y=attribute, data=count_df, palette="viridis", hue=attribute)
     plt.xlabel("Number of Bills")
     plt.ylabel(attribute)
@@ -113,7 +115,13 @@ def calculate_frequency_distribution(dataframe: pd.DataFrame, attribute: str):
     print(f"Summary Stats for Counts for {attribute}:\n{frequency_summary_stats}\n")
 
 
-def cross_tabulation_heatmap(dataframe: pd.DataFrame, attributes: list, n: int = None):
+def cross_tabulation_heatmap(
+    dataframe: pd.DataFrame,
+    attributes: list,
+    n1: int = None,
+    n2: int = None,
+    figsize: tuple = (10, 10),
+):
     """
     Returns a heatmap to display the cross tabulation (pairwise analysis) between two attributes
     """
@@ -121,9 +129,25 @@ def cross_tabulation_heatmap(dataframe: pd.DataFrame, attributes: list, n: int =
 
     attr1, attr2 = attributes
 
-    if n:
-        top_attr1 = dataframe_copy[attr1].value_counts()[:n].index
-        top_attr2 = dataframe_copy[attr2].value_counts()[:n].index
+    if n1 and n2:
+        top_attr1 = dataframe_copy[attr1].value_counts()[:n1].index
+        top_attr2 = dataframe_copy[attr2].value_counts()[:n2].index
+        dataframe_copy = dataframe_copy[
+            dataframe_copy[attr1].isin(top_attr1)
+            & dataframe_copy[attr2].isin(top_attr2)
+        ]
+
+    elif n1:
+        top_attr1 = dataframe_copy[attr1].value_counts()[:n1].index
+        top_attr2 = dataframe_copy[attr2].value_counts().index
+        dataframe_copy = dataframe_copy[
+            dataframe_copy[attr1].isin(top_attr1)
+            & dataframe_copy[attr2].isin(top_attr2)
+        ]
+
+    elif n2:
+        top_attr1 = dataframe_copy[attr1].value_counts().index
+        top_attr2 = dataframe_copy[attr2].value_counts()[:n2].index
         dataframe_copy = dataframe_copy[
             dataframe_copy[attr1].isin(top_attr1)
             & dataframe_copy[attr2].isin(top_attr2)
@@ -131,7 +155,7 @@ def cross_tabulation_heatmap(dataframe: pd.DataFrame, attributes: list, n: int =
 
     frequency_matrix = pd.crosstab(dataframe_copy[attr1], dataframe_copy[attr2])
     # Plot heatmap
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=figsize)
     sns.heatmap(frequency_matrix, cmap="viridis", annot=True, fmt="d")
     plt.title(f"{attr1} vs. {attr2} Co-occurence Heatmap")
     plt.xlabel(f"{attr2}")
