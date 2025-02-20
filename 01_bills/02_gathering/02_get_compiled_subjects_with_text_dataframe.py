@@ -3,7 +3,9 @@ import logging
 
 from pathlib import Path
 from typing_extensions import Annotated
-from utils.dataframe import fetch_and_populate_subject_dataframe_from_source_data
+from utils.dataframe import (
+    fetch_and_populate_subject_bill_text_dataframe_from_source_data,
+)
 
 import pandas as pd
 
@@ -16,7 +18,13 @@ def get_compiled_subjects_dataframe(
     output_path: Annotated[
         Path,
         typer.Option(help="Location to dataframe created."),
-    ] = Path("../../local_data/01_bills/generated_data/full_compiled_subjects.csv.gz"),
+    ] = Path(
+        "../../local_data/01_bills/generated_data/full_compiled_subjects_with_text.csv.gz"
+    ),
+    glob_pattern: Annotated[
+        str,
+        typer.Option(help="Glob pattern used to loop through source directory."),
+    ] = "*/*/*",
     log_level: Annotated[
         str,
         typer.Option(
@@ -41,8 +49,10 @@ def get_compiled_subjects_dataframe(
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
 
-    fetch_and_populate_subject_dataframe_from_source_data(
-        source_directory=source_directory, output_path=output_path
+    fetch_and_populate_subject_bill_text_dataframe_from_source_data(
+        source_directory=source_directory,
+        output_path=output_path,
+        glob_pattern=glob_pattern,
     )
 
 

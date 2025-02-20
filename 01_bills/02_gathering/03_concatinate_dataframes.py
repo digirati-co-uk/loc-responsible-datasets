@@ -3,20 +3,24 @@ import logging
 
 from pathlib import Path
 from typing_extensions import Annotated
-from utils.dataframe import fetch_and_populate_subject_dataframe_from_source_data
+from utils.dataframe import (
+    concat_dataframes,
+)
 
 import pandas as pd
 
 
-def get_compiled_subjects_dataframe(
+def get_concatinated_dataframe(
     source_directory: Annotated[
         Path,
-        typer.Option(help="Location to retrieve source data fetched from the API."),
-    ] = Path("../../local_data/01_bills/source_bills"),
-    output_path: Annotated[
-        Path,
-        typer.Option(help="Location to dataframe created."),
-    ] = Path("../../local_data/01_bills/generated_data/full_compiled_subjects.csv.gz"),
+        typer.Option(
+            help="Location to retrieve source dataframes separated by congress."
+        ),
+    ] = Path("../../local_data/01_bills/generated_data"),
+    dataframe_file: Annotated[
+        str,
+        typer.Option(help="Name of consistent dataframe file for filtering."),
+    ] = "compiled_subjects.csv.gz",
     log_level: Annotated[
         str,
         typer.Option(
@@ -25,9 +29,9 @@ def get_compiled_subjects_dataframe(
     ] = "INFO",
 ):
     """
-    Runs through all subject.json within a directory
-    Pulls out bill identifiers, legislativeSubjects and policyArea to populate a dataframe
-    Saves dataframe to output path
+    Used for when 01 or 02 is run on a Congress by Congress basis.
+    Runs through dataframe_file CSVs in source directory and reads in the data.
+    Concatinates dataframe and saves to source directory under the file name "concat_<dataframe_file>"
     """
     log_level = log_level.upper()
     level_enum = getattr(logging, log_level, None)
@@ -41,10 +45,8 @@ def get_compiled_subjects_dataframe(
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
 
-    fetch_and_populate_subject_dataframe_from_source_data(
-        source_directory=source_directory, output_path=output_path
-    )
+    concat_dataframes(source_directory=source_directory, dataframe_file=dataframe_file)
 
 
 if __name__ == "__main__":
-    typer.run(get_compiled_subjects_dataframe)
+    typer.run(get_concatinated_dataframe)
