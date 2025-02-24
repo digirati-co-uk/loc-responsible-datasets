@@ -3,6 +3,8 @@ import logging
 import pandas as pd
 
 from typing import Union
+
+from collections import Counter
 from imblearn.under_sampling import (
     RandomUnderSampler,
     NeighbourhoodCleaningRule,
@@ -51,7 +53,7 @@ class Resampler(object):
         attribute_to_balance: str,
         sampling_strategy: str = "auto",
         replacement: bool = False,
-        # min_count: int = None,
+        min_count: int = None,
     ):
         """
         Under-sample the majority class(es) by randomly picking samples with or without replacement
@@ -65,12 +67,18 @@ class Resampler(object):
         """
 
         dataframe_copy = get_dataframe_copy(self.dataset, attribute_to_balance)
-        # if not min_count:
-        #     subject_counts = dataframe_copy[attribute_to_balance].value_counts()
-        #     min_count = subject_counts.min()
+
+        # subject_counts = dataframe_copy[attribute_to_balance].value_counts()
+        # min_count = subject_counts.min()
 
         X = dataframe_copy.drop(columns=attribute_to_balance)
         y = dataframe_copy[attribute_to_balance]
+
+        class_counts = Counter(y)
+        if min_count:
+            sampling_strategy = {
+                cls: min(min_count, count) for cls, count in class_counts.items()
+            }
 
         rus = RandomUnderSampler(
             sampling_strategy=sampling_strategy,
@@ -97,6 +105,7 @@ class Resampler(object):
         attribute_to_balance: str,
         sampling_strategy: str = "auto",
         n_neighbors: int = 3,
+        features_to_remove: list = None,
     ):
         """
         Under-samples based on NearMiss methods
@@ -116,6 +125,7 @@ class Resampler(object):
 
         features = list(dataframe_copy.columns)
         features.remove(attribute_to_balance)
+        features = [f for f in features if f not in features_to_remove]
 
         encoders = {}
         for feature in features:
@@ -124,15 +134,12 @@ class Resampler(object):
                 encoder = encoders[f"{feature}_encoded"]
                 dataframe_copy[feature] = encoder.fit_transform(dataframe_copy[feature])
 
-        X = dataframe_copy.drop(columns=attribute_to_balance)
-        y = dataframe_copy[attribute_to_balance]
+        columns_to_drop = [attribute_to_balance]
+        if features_to_remove:
+            columns_to_drop.extend(features_to_remove)
 
-        encoders = {}
-        for col in list(X.columns):
-            if isinstance(X.iloc[0][col], str):
-                encoders[f"{col}_encoded"] = LabelEncoder()
-                encoder = encoders[f"{col}_encoded"]
-                X[col] = encoder.fit_transform(X[col])
+        X = dataframe_copy.drop(columns=columns_to_drop)
+        y = dataframe_copy[attribute_to_balance]
 
         nm = NeighbourhoodCleaningRule(
             n_neighbors=n_neighbors, sampling_strategy=sampling_strategy
@@ -150,14 +157,16 @@ class Resampler(object):
             )
 
         if isinstance(self.dataset.iloc[0][attribute_to_balance], list):
-            features = list(dataframe_copy.columns)
-            features.remove(attribute_to_balance)
             df_resampled = (
                 df_resampled.groupby(features)[attribute_to_balance]
                 .apply(list)
                 .reset_index()
             )
 
+        df_resampled = self.dataset.merge(
+            df_resampled[["congress", "billType", "billNumber"]],
+            on=["congress", "billType", "billNumber"],
+        )
         return df_resampled
 
     def near_miss_undersampling(
@@ -165,6 +174,7 @@ class Resampler(object):
         attribute_to_balance: str,
         sampling_strategy: str = "auto",
         n_neighbors: int = 3,
+        features_to_remove: list = None,
     ):
         """
         Under-samples based on NearMiss methods
@@ -192,15 +202,11 @@ class Resampler(object):
                 encoder = encoders[f"{feature}_encoded"]
                 dataframe_copy[feature] = encoder.fit_transform(dataframe_copy[feature])
 
-        X = dataframe_copy.drop(columns=attribute_to_balance)
+        columns_to_drop = [attribute_to_balance]
+        if features_to_remove:
+            columns_to_drop.extend(features_to_remove)
+        X = dataframe_copy.drop(columns=columns_to_drop)
         y = dataframe_copy[attribute_to_balance]
-
-        encoders = {}
-        for col in list(X.columns):
-            if isinstance(X.iloc[0][col], str):
-                encoders[f"{col}_encoded"] = LabelEncoder()
-                encoder = encoders[f"{col}_encoded"]
-                X[col] = encoder.fit_transform(X[col])
 
         subject_counts = y.value_counts()
         min_class_count = subject_counts.min()
@@ -230,6 +236,11 @@ class Resampler(object):
                 .reset_index()
             )
 
+        df_resampled = self.dataset.merge(
+            df_resampled[["congress", "billType", "billNumber"]],
+            on=["congress", "billType", "billNumber"],
+        )
+
         return df_resampled
 
     def tomek_links(
@@ -243,6 +254,7 @@ class Resampler(object):
         self,
         attribute_to_balance: str,
         sampling_strategy: str = "auto",
+        max_count: int = 5,
     ):
         """
         Over-sample the minority class(es) by randomly picking samples with or without replacement
@@ -259,6 +271,12 @@ class Resampler(object):
 
         X = dataframe_copy.drop(columns=attribute_to_balance)
         y = dataframe_copy[attribute_to_balance]
+
+        class_counts = Counter(y)
+        if max_count:
+            sampling_strategy = {
+                cls: max(count, max_count) for cls, count in class_counts.items()
+            }
 
         ros = RandomOverSampler(
             sampling_strategy=sampling_strategy,

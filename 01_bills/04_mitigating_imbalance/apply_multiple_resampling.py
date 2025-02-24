@@ -21,16 +21,22 @@ def apply_sampling(
     output_directory: Annotated[
         Path, typer.Option(help="Location to store the resampling dataset.")
     ] = Path("../../local_data/01_bills/generated_data/resampled_data"),
-    resampling_type: Annotated[
+    resampling_type1: Annotated[
         str,
         typer.Option(
-            help="Type of resampling technique to be applied to original dataset (random_undersampling, random_oversampling, knn_undersampling, near_miss_undersampling)"
+            help="First resampling technique to be applied to original dataset (random_undersampling, random_oversampling, knn_undersampling, near_miss_undersampling)"
         ),
     ] = "random_undersampling",
+    resampling_type2: Annotated[
+        str,
+        typer.Option(
+            help="Second resampling technique to be applied to original dataset (random_undersampling, random_oversampling, knn_undersampling, near_miss_undersampling)"
+        ),
+    ] = "random_oversampling",
     arguments: Annotated[
         str,
         typer.Option(help="Key to access correct ARGUMENTS in config.py"),
-    ] = "basic_random_undersampling",
+    ] = "rus_ros",
     attribute_to_balance: Annotated[
         str,
         typer.Option(help="Attribute that the dataset will be balanced on"),
@@ -64,12 +70,13 @@ def apply_sampling(
     dataset = pd.read_csv(
         source_df_path, compression="gzip", converters={"legislativeSubjects": pd.eval}
     )
-    resampler = Resampler(dataset=dataset, random_state=random_state)
-    resampling_method = getattr(resampler, resampling_type)
-
-    resampled_data = resampling_method(
-        attribute_to_balance=attribute_to_balance, **ARGUMENTS.get(arguments)
-    )
+    for i, resampling_type in enumerate([resampling_type1, resampling_type2]):
+        resampler = Resampler(dataset=dataset, random_state=random_state)
+        resampling_method = getattr(resampler, resampling_type)
+        resampled_data = resampling_method(
+            attribute_to_balance=attribute_to_balance, **ARGUMENTS.get(arguments)[i]
+        )
+        dataset = resampled_data
 
     output_path = output_directory / f"{attribute_to_balance}_{arguments}.csv.gz"
     print(f"Saving to: {output_path=} ...")
