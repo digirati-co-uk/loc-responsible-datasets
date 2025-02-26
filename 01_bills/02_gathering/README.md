@@ -19,7 +19,7 @@ If a bill does not have a `subjects.json` and/ or `text.json` then it will also 
 
 ## How to run
 
-Ensure that the directory containing the relevant information for the bills data retrieved using the scripts from [01_retrieval](01_retrieval) is structured such that each individual bill has a directory with the following path: `{source_bills}/{congress}/{billType}/{billNumber}/`
+Ensure that the directory containing the relevant information for the bills data retrieved using the scripts from [01_retrieval](../01_retrieval) is structured such that each individual bill has a directory with the following path: `{source_bills}/{congress}/{billType}/{billNumber}/`
 
 Activate suitable environment. If using a uv venv, run `uv run <script_name.py>`
 
