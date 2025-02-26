@@ -61,6 +61,20 @@ def calculate_class_ratio(dataframe: pd.DataFrame, attribute: str, n: int = 3):
     return class_ratio
 
 
+def calculate_class_ratio_between_most_least(
+    dataframe: pd.DataFrame, attribute: str, n: int = 3
+):
+    """
+    Takes in dataframe and attribute
+    Returns class ratios (proportion of each value), most and least dominant values
+
+    """
+    class_ratio = calculate_class_ratio(dataframe=dataframe, attribute=attribute)
+
+    ci_ratio = class_ratio[-1] / class_ratio[0]
+    return round(ci_ratio, 4)
+
+
 def analyze_bias_crosstab(
     dataframe: pd.DataFrame,
     attributes: list,
