@@ -71,8 +71,8 @@ def calculate_class_ratio_between_most_least(
     """
     class_ratio = calculate_class_ratio(dataframe=dataframe, attribute=attribute)
 
-    ci_ratio = class_ratio[-1] / class_ratio[0]
-    return round(ci_ratio, 4)
+    ci_ratio = class_ratio.iloc[-1] / class_ratio.iloc[0]
+    print(f"Overall Imbalance Ratio: {round(ci_ratio, 5)}")
 
 
 def analyze_bias_crosstab(
