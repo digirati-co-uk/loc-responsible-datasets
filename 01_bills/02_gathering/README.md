@@ -1,11 +1,13 @@
 # 02_Gathering
-This directory holds the code for creating Pandas datafames which is to be run following the retrieval of information from the Congres.gov APIs using the scripts in [01_retrieval](01_retrieval).
+This directory holds the code for creating Pandas datafames which is to be run following the retrieval of information from the Congres.gov APIs using the scripts in [01_retrieval](../01_retrieval).
 
 ### Script explanations
 1. [01_get_compiled_subjects_dataframe.py](01_get_compiled_subjects_dataframe.py) 
+
 Returns a dataframe containing for each bill its identifiers (congress, billNumber and billType), policyArea and legislativeSubjects. This data is gathered using the `subjects.json` file for each bill. If a bill does not have this file then it will not be in the resulting dataframe.
 
 2. [02_get_compiled_subjects_with_text_dataframe.py](02_get_compiled_subjects_with_text_dataframe.py)
+
 Returns a dataframe containing for each bill its identifiers (congress, billNumber and billType), policyArea, legislativeSubjects and billText. 
 
 The subjects data (legislativeSubjects and policyArea) is gathered using the `subjects.json` file for each bill. 
