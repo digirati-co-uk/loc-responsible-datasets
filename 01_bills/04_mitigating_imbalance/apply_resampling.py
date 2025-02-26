@@ -49,7 +49,8 @@ def apply_sampling(
     ] = "INFO",
 ):
     """
-    Local CLI Wrapper for the Resampling object.
+    Takes dataset and applies relevant resampling technique and arguments given in config.py
+    Saves dataframe to output_directory under file name {attribute_to_balance}_{arguments}.csv.gz
     """
 
     log_level = log_level.upper()
