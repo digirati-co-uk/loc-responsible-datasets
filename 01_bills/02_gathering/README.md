@@ -26,6 +26,3 @@ Activate suitable environment. If using a uv venv, run `uv run <script_name.py>`
 Tips:
 - For quicker execution of code, it is advised to run [01_get_compiled_subjects_dataframe.py](01_get_compiled_subjects_dataframe.py) or [02_get_compiled_subjects_with_text_dataframe.py](02_get_compiled_subjects_with_text_dataframe.py) on a Congress by Congress basis. To do so, set the `source_directory` argument to point to the directory `{source_bills}/{congress}` for each `congress` instead of the source_bills parent directory, and change `glob pattern` to `"*/*/"`
 - To concatinate the dataframes created per congress, run [03_concatinate_dataframes.py](03_concatinate_dataframes.py).
-
-
-01_get_compiled_subjects_dataframe.py should be run following from the scripts in retrieval step from 01_retrieval
