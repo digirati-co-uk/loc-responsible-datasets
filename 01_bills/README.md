@@ -21,9 +21,11 @@ An example of the dataframe is as follows:
 
 | congress | billType | billNumber | legislativeSubjects                                | policyArea                                  | billText                                          |
 | :---:    | :---:    | :---:      | :---:                                              | :---:                                       | :---:                                             |
-| 101      | hconres  | 1          | [American economic assistance, American milita...] | International Affairs	                      | <pre>Â \nB37 6-6-89 [OC's]\nHCON 1 IH\n101st C... |
-| 101      | hconres  | 10         | [Constitutional law, Meditation, Prayer in the...] | Civil Rights and Liberties, Minority Issues | <pre>Â \nB37 Rosey 1/4/89 [Updated]\nHCON 10 I..  |
-| 101      | hconres  | 100        | [Genocide, Human rights, International relief,...] | International Affairs | <pre>Â \nHCON 100 IH\n101st CONGRESS\n1st Sess... |
+| 101      | hconres  | 1          | [American economic assistance, American milita...] | International Affairs	                      | `<pre>Â \nB37 6-6-89 [OC's]\nHCON 1 IH\n101st C...` |
+| 101      | hconres  | 10         | [Constitutional law, Meditation, Prayer in the...] | Civil Rights and Liberties, Minority Issues | `<pre>Â \nB37 Rosey 1/4/89 [Updated]\nHCON 10 I..`  |
+| 101      | hconres  | 100        | [Genocide, Human rights, International relief,...] | International Affairs | `<pre>Â \nHCON 100 IH\n101st CONGRESS\n1st Sess...` |
+
+Note that the billText values in this example have been truncated. Bill texts contain roughly 7000 words on average.
 
 ### Data Fields
 | Field               | Description |
@@ -33,7 +35,7 @@ An example of the dataframe is as follows:
 | billNumber          | Integer indicating the bill number |
 | legislativeSubjects | List of strings showing the legislative subjects assigned to the bill |
 | policyArea          | String showing the policy area assigned to the bill |
-| billText            | String containing the most recent text of the bill |
+| billText            | HTML string containing the most recent text of the bill |
 
 ### Data Versions
 We are providing multiple version of the bills dataset. These include the original version, with some bills being removed from the set according to set criteria, and versions that have had resampling techniques applied to mitigate the statistical bias (imbalance) present in the original data. 
@@ -69,7 +71,7 @@ To mitigate this bias caused by statistical imbalance, we have created multiple 
 4. Random Oversampling
 5. Hybrid: Random Undersampling followed by Random Oversampling.
 
-Please see here for our [configurations](04_mitigating_imbalance/config.py).
+Please see here for our [configurations](04_mitigating_imbalance/config.py). explain config file
 
 
 ### Personal and Sensitive Information
