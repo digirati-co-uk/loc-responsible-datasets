@@ -25,7 +25,7 @@ An example of the dataframe is as follows:
 | 101      | hconres  | 10         | [Constitutional law, Meditation, Prayer in the...] | Civil Rights and Liberties, Minority Issues | <pre>Â \nB37 Rosey 1/4/89 [Updated]\nHCON 10 I..  |
 
 ### Data Fields
-| :---:    | :---:    |
+| - | - |
 | congress            | String or integer indicating the congress that the bill belongs to |
 | billType            | String indicating the house that the bill belong to |
 | billNumber          | Integer indicating the bill number |
