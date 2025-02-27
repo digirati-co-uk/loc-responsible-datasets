@@ -33,7 +33,7 @@ def get_compiled_subjects_dataframe(
     ] = "INFO",
 ):
     """
-    Runs through all subject.json within a directory
+    Runs through all subject.json and text.json files within a directory
     Pulls out bill identifiers, legislativeSubjects and policyArea to populate a dataframe
     Saves dataframe to output path
     """
