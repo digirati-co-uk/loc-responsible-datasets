@@ -23,9 +23,11 @@ An example of the dataframe is as follows:
 | :---:    | :---:    | :---:      | :---:                                              | :---:                                       | :---:                                             |
 | 101      | hconres  | 1          | [American economic assistance, American milita...] | International Affairs	                      | <pre>Â \nB37 6-6-89 [OC's]\nHCON 1 IH\n101st C... |
 | 101      | hconres  | 10         | [Constitutional law, Meditation, Prayer in the...] | Civil Rights and Liberties, Minority Issues | <pre>Â \nB37 Rosey 1/4/89 [Updated]\nHCON 10 I..  |
+| 101      | hconres  | 100        | [Genocide, Human rights, International relief,...] | International Affairs | <pre>Â \nHCON 100 IH\n101st CONGRESS\n1st Sess... |
 
 ### Data Fields
-| - | - |
+| Field               | Description |
+|:---:                |:---:                              |
 | congress            | String or integer indicating the congress that the bill belongs to |
 | billType            | String indicating the house that the bill belong to |
 | billNumber          | Integer indicating the bill number |
