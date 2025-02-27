@@ -1,6 +1,6 @@
 # 01_Bills
 
-## Bills Classification Datacard 
+# Bills Classification Datacard 
 
 ## Dataset Description
 Repository:
@@ -43,13 +43,34 @@ All files are gzipped which range from 0.02GB to 0.84GB in size.
 ## Dataset Creation
 
 ### Curation Rationale
+This dataset as been created on behalf of Library of Congress.
+
 ### Source Data
+The source data comprises the Congressional Bills relevant files (subjects, texts, metadata) which are available through the Congress.gov API.
+
 #### Initial Data Collection and Normalization
+
+##### Data Retrievals
 Finlay
 
 
 
+
+##### Normalization
 We have made the decision to not perform any text related pre-processing on the bill text itself. This data has been retrieved by filtering the text versions by date and taking the most recent HTML file in its raw format. As such, the text contains HTML tags which may or may not be useful depending on the model the user decides to use. We have therefore left it up to the user of the dataset to determine what, if any, pre-processing they would like to apply to the bill texts.
+
+##### Statistical Bias (Imbalance)
+As part of our initial exploratory data analysis, general and targeted statistical profiling was performed on the data [(see notebooks here)](03_profiling). It was discovered that the data was highly skewed with regards to legislative subjects which include Geographic Entities and Organization Names, with the most common occuring term appearing over 30,000 times while the least common only appearing once. Due to this descrepancy it is highly likely that any classification models trained on the original data will be biased towards the more frequently occuring terms.
+
+To mitigate this bias caused by statistical imbalance, we have created multiple resampled versions of this data and reapplyed some statistical profiling to evaluate the subsequent datasets, ([see notebook](03_profiling/03_post_resampling_stat_profiling_visualization.ipynb) for visualization and analysis of data splits). To outline, mitigation methods that have been applied as as follows:
+1. Random Undersampling
+2. k-Nearest-Neighbors Undersampling
+3. NearMiss Undersampling
+4. Random Oversampling
+5. Hybrid: Random Undersampling followed by Random Oversampling.
+
+Please see here for our [configurations](04_mitigating_imbalance/config.py).
+
 
 ### Personal and Sensitive Information
 The bills used are public law texts.
@@ -66,3 +87,6 @@ The datasets used in the experiment are public domain, and all data generated ha
 
 ### Citation Information
 ### Contributions
+
+
+# How to run
