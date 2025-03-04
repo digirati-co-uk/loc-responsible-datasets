@@ -94,9 +94,10 @@ def detailed_bill_record(
         text_json = json.load(source_filesystem.open(text_file_path, "r"))
         for version in text_json.get("textVersions"):
             text_type = version.get("type")
+            date = version.get("date")
             for format in version.get("formats"):
                 format_type = format.get("type")
-                text_formats.append((text_type, format_type))
+                text_formats.append((text_type, format_type, date))
         record["text_formats"] = text_formats
     return record
 

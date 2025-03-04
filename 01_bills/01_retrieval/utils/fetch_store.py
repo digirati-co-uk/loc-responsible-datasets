@@ -285,7 +285,7 @@ def fetch_and_store_bills_from_source_page(
     page_bills = source_data.get("bills")
     total_bills = len(page_bills)
     for count, bill_data in enumerate(source_data.get("bills"), start=1):
-        logger.info(f"{count}/{total_bills}")
+        logger.debug(f"{count}/{total_bills}")
         congress = int(bill_data.get("congress"))
         house = bill_data.get("type").lower()
         bill_number = int(bill_data.get("number"))
