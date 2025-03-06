@@ -5,7 +5,7 @@
 ## Dataset Description
 
 ### Dataset Summary
-The Bills Classification dataset is a collection of Congressional Bills with their legislative subjects and policy areas, suitable and intended for use in training and evaluating (large language) classification models. 
+The Bills Classification dataset is a collection of Congressional Bills from the  with their legislative subjects and policy areas, suitable and intended for use in training and evaluating (large language) classification models. 
 
 ### Supported Tasks
 
@@ -51,11 +51,9 @@ The source data comprises the Congressional Bills relevant files (subjects, text
 
 #### Initial Data Collection and Normalization
 
-##### Data Retrievals
-Finlay
+##### Data Retrieval
 
-
-
+Data on individual bills from the 101st to 118th Congresses was gathered from the [Congress.gov API](https://api.congress.gov/)
 
 ##### Normalization
 We have made the decision to not perform any text related pre-processing on the bill text itself. This data has been retrieved by filtering the text versions by date and taking the most recent HTML file in its raw format. As such, the text contains HTML tags which may or may not be useful depending on the model the user decides to use. We have therefore left it up to the user of the dataset to determine what, if any, pre-processing they would like to apply to the bill texts.

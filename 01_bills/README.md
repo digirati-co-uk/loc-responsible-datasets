@@ -3,16 +3,26 @@
 
 ## Dataset
 
-[DataCard.md](./DataCard.md) contains information about the final dataset. 
+[DataCard.md](./DataCard.md) contains information about both the overall and resampled datasets described below. 
 
-Dataset S3 urls: 
+
+### Dataset 1: 
+Single dataset file. 
+  - No resampling, contains all of the data available from the source data collected from the API. 
+  - [s3://loc-responsible-datasets/01_bills/generated_data/concat_compiled_subjects_with_text.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/concat_compiled_subjects_with_text.csv.gz)
+
+### Dataset 2: 
+
+Multiple methods of re-sampling data. 
+
+- Random under-sampling followed my random oversampling. 
+  - This was judged to be the best re-sampling method, as it allowed for an improved imbalance ratio, maintenance of overall class distribution and adequate sample size. 
+  - [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_rus_ros.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_rus_ros.csv.gz)
 - [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_knn_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_knn_undersampling.csv.gz)
 - [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_near_miss_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_near_miss_undersampling.csv.gz)
 - [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_oversampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_oversampling.csv.gz)
 - [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_undersampling.csv.gz)
 - [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_random_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_random_undersampling.csv.gz)
-- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_rus_ros.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_rus_ros.csv.gz)
-- [s3://loc-responsible-datasets/01_bills/generated_data/concat_compiled_subjects_with_text.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/concat_compiled_subjects_with_text.csv.gz)
 
 
 ## Code

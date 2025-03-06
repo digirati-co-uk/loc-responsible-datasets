@@ -109,11 +109,20 @@ n.b. all example commands below also include the `CONGRESS_GOV_API_KEY` provided
     ```
 
 ### Dataset information 
-[create_bill_status_dataframes.py](./create_bill_status_dataframes.py)
-
-[create_page_status_dataframes.py](./create_page_status_dataframes.py)
-
-[status_reporting.ipynb](./status_reporting.ipynb)
+- [create_page_status_dataframes.py](./create_page_status_dataframes.py)
+  - Create CSV files on a congress basis from locally stored page status files. This is intended to be used as the basis for reporting information about the progress of the download and general characteristics of the dataset. 
+  - To run: 
+  ```sh
+  uv run create_page_status_dataframes.py --source-location=../local_data/01_bills/source_pages
+  ```
+- [create_bill_status_dataframes.py](./create_bill_status_dataframes.py)
+  - Create CSV files on a congress basis from locally stored page status files and locally stored bill JSON files. This is intended to be used as the basis for reporting information about the progress of the download and general characteristics of the dataset, with more detail about the files associated. 
+  - To run: 
+    ```sh
+    uv run create_bill_status_dataframes.py --source-location=../local_data/01_bills/
+    ```
+- [status_reporting.ipynb](./status_reporting.ipynb)
+  - Load and inspect the CSV files created by `create_bill_status_dataframes.py` and `create_bill_status_dataframes.py`. Provides information about the overall progress of downloads when applied to locally synced source data. 
 
 ### Other
 
