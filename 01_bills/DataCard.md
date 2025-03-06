@@ -5,7 +5,7 @@
 ## Dataset Description
 
 ### Dataset Summary
-The Bills Classification dataset is a collection of Congressional Bills from the  with their legislative subjects and policy areas, suitable and intended for use in training and evaluating (large language) classification models. 
+The Bills Classification dataset is a collection of Congressional Bills from the 101st to 118th Congress with their legislative subjects and policy areas, suitable and intended for use in training and evaluating (large language) classification models.  
 
 ### Supported Tasks
 
@@ -53,15 +53,15 @@ The source data comprises the Congressional Bills relevant files (subjects, text
 
 ##### Data Retrieval
 
-Data on individual bills from the 101st to 118th Congresses was gathered from the [Congress.gov API](https://api.congress.gov/)
+Data on individual bills from the 101st to 118th Congresses was gathered from the [Congress.gov API](https://api.congress.gov/). This initial range of source data for the datasets was selected as it could provide a consistent set of subjects along with plaintext for bills suitable for use in classification tasks. 
 
 ##### Normalization
 We have made the decision to not perform any text related pre-processing on the bill text itself. This data has been retrieved by filtering the text versions by date and taking the most recent HTML file in its raw format. As such, the text contains HTML tags which may or may not be useful depending on the model the user decides to use. We have therefore left it up to the user of the dataset to determine what, if any, pre-processing they would like to apply to the bill texts.
 
 ##### Statistical Bias (Imbalance)
-As part of our initial exploratory data analysis, general and targeted statistical profiling was performed on the data [(see notebooks here)](03_profiling). It was discovered that the data was highly skewed with regards to legislative subjects, which include Geographic Entities and Organization Names, with the most common occuring term appearing over 30,000 times while the least common only appears once. Due to this descrepancy it is highly likely that any classification models trained on the original data will be biased towards the more frequently occuring terms.
+As part of our initial exploratory data analysis, general and targeted statistical profiling was performed on the data [(see notebooks here)](03_profiling). It was discovered that the data was highly skewed with regards to legislative subjects, which include Geographic Entities and Organization Names, with the most common occurring term appearing over 30,000 times while the least common only appears once. Due to this discrepancy it is highly likely that any classification models trained on the original data will be biased towards the more frequently occurring terms.
 
-To mitigate this bias caused by statistical imbalance, we have created multiple resampled versions of this data and reapplied some statistical profiling to evaluate the subsequent datasets, [see notebook](03_profiling/03_post_resampling_stat_profiling_visualization.ipynb) for visualization and analysis of data splits. To outline, mitigation methods that have been applied are as follows:
+To mitigate this bias caused by statistical imbalance, we have created multiple re-sampled versions of this data and reapplied some statistical profiling to evaluate the subsequent datasets, [see notebook](03_profiling/03_post_resampling_stat_profiling_visualization.ipynb) for visualization and analysis of data splits. To outline, mitigation methods that have been applied are as follows:
 1. Random Undersampling
 2. k-Nearest-Neighbors Undersampling
 3. NearMiss Undersampling
@@ -71,13 +71,21 @@ To mitigate this bias caused by statistical imbalance, we have created multiple 
 Please see our [configurations](04_mitigating_imbalance/config.py) used for these techniques. The configurations include arguments specific to each approach which may be similar for some due to the nature of each algorithm.
 
 
+
 ### Personal and Sensitive Information
 The bills used are public law texts, therefore any identifiable information will pertain to public figures.
 
 ## Considerations for Using the Data
+Not applicable. 
+
 ### Social Impact of Dataset
+Not applicable. 
+
 ### Discussion of Biases
+Not applicable. 
+
 ### Other Known Limitations
+Not applicable. 
 
 ## Additional Information
 ### Dataset Curators
