@@ -4,13 +4,12 @@ import typer
 import logging
 
 from typing_extensions import Annotated
-from pathlib import Path
 from utils.fetch_store import (
-    fetch_and_store_bills_from_source_page,
+    fetch_and_store_congress_bills_source_pages,
 )
 
 
-def get_bills_from_source_page(
+def get_congress_bills_source_pages(
     api_key: Annotated[
         str,
         typer.Argument(
@@ -21,18 +20,21 @@ def get_bills_from_source_page(
     api_url: Annotated[
         str, typer.Option(help="Base url for the Congress.gov API instance.")
     ] = "https://api.congress.gov/v3/",
-    source_path: Annotated[
-        Path,
+    congress: Annotated[
+        int, typer.Option(help="Congress to fetch and store bill pages for")
+    ] = 111,
+    output_location: Annotated[
+        str,
         typer.Option(
-            help="Location of JSON file containing the source page with list of bills."
+            help="Location to store the pages fetched from the API. Can be a s3 url (e.g. s3://loc-responsible-datasets-source-data/01_bills/source_pages) or a directory path."
         ),
-    ] = Path("../local_data/source_pages/111_0.json"),
-    output_directory: Annotated[
-        Path, typer.Option(help="Location to store the bill data fetched from the API.")
-    ] = Path("../local_data/source_bills"),
+    ] = "../local_data/01_bills/source_pages",
+    page_limit: Annotated[
+        int, typer.Option(help="Number of bills in each page, max: 250")
+    ] = 250,
     overwrite: Annotated[
         bool,
-        typer.Option(help="Whether to refetch data and overwrite existing bill files"),
+        typer.Option(help="Whether to refetch data and overwrite an existing page"),
     ] = False,
     log_level: Annotated[
         str,
@@ -42,7 +44,7 @@ def get_bills_from_source_page(
     ] = "INFO",
 ):
     """
-    Local CLI Wrapper for the `fetch_and_store_bills_from_source_page` function.
+    Local CLI Wrapper for the `fetch_and_store_congress_bills_source_pages` function.
 
     """
     log_level = log_level.upper()
@@ -55,16 +57,16 @@ def get_bills_from_source_page(
     )
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("charset_normalizer").setLevel(logging.WARNING)
 
-    fetch_and_store_bills_from_source_page(
+    fetch_and_store_congress_bills_source_pages(
         api_url=api_url,
         api_key=api_key,
-        source_path=source_path,
-        output_directory=output_directory,
+        congress=congress,
+        output_location=output_location,
+        page_limit=page_limit,
         overwrite=overwrite,
     )
 
 
 if __name__ == "__main__":
-    typer.run(get_bills_from_source_page)
+    typer.run(get_congress_bills_source_pages)

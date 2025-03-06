@@ -10,7 +10,7 @@ from utils.dataframe import (
 import pandas as pd
 
 
-def get_concatinated_dataframe(
+def get_concatenated_dataframe(
     source_directory: Annotated[
         Path,
         typer.Option(
@@ -31,7 +31,7 @@ def get_concatinated_dataframe(
     """
     Used for when 01 or 02 is run on a Congress by Congress basis.
     Runs through dataframe_file CSVs in source directory and reads in the data.
-    Concatinates dataframe and saves to source directory under the file name "concat_<dataframe_file>"
+    concatenates dataframe and saves to source directory under the file name "concat_<dataframe_file>"
     """
     log_level = log_level.upper()
     level_enum = getattr(logging, log_level, None)
@@ -49,4 +49,4 @@ def get_concatinated_dataframe(
 
 
 if __name__ == "__main__":
-    typer.run(get_concatinated_dataframe)
+    typer.run(get_concatenated_dataframe)
