@@ -3,8 +3,6 @@
 The source data for this dataset has been gathered from the [Congress.gov API](https://api.congress.gov/) and stored in an s3 bucket for further processing. 
 
 
-## Data Structure
-
 ## Scripts
 
 This directory contains scripts used to retrieve the source data for the bills dataset. Scripts are provided that can be run in a local environment and store in a local filesystem, or that can be run in a ray cluster and store to an s3  bucket. In practice, the latter was used to gather the source data as it allowed for parallelisation in a more resilient environment (e.g. task re-running on failure). 
@@ -19,6 +17,12 @@ export RAY_ADDRESS="http://127.0.0.1:8264"
 export CONGRESS_GOV_API_KEY=<CONGRESS_GOV_API_KEY>
 ```
 n.b. all example commands below also include the `CONGRESS_GOV_API_KEY` provided as an argument or option where appropriate. 
+
+### Data Structure and Location
+
+
+
+
 
 ### Congress bill pages
 
