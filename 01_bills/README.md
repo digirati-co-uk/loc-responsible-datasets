@@ -5,6 +5,16 @@
 
 [DataCard.md](./DataCard.md) contains information about the final dataset. 
 
+Dataset S3 urls: 
+- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_knn_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_knn_undersampling.csv.gz)
+- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_near_miss_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_near_miss_undersampling.csv.gz)
+- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_oversampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_oversampling.csv.gz)
+- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_basic_random_undersampling.csv.gz)
+- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_random_undersampling.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_random_undersampling.csv.gz)
+- [s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_rus_ros.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/resampled_data/legislativeSubjects_rus_ros.csv.gz)
+- [s3://loc-responsible-datasets/01_bills/generated_data/concat_compiled_subjects_with_text.csv.gz](s3://loc-responsible-datasets/01_bills/generated_data/concat_compiled_subjects_with_text.csv.gz)
+
+
 ## Code
 
 [uv](https://docs.astral.sh/uv/) has been used for dependency and environment management on this project, with [pyproject.toml](pyproject.toml) containing the relevant configuration. All scripts and notebooks in subdirectories can be run using this environment. 
