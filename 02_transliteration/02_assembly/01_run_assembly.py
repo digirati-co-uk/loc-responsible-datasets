@@ -60,7 +60,7 @@ def apply_assembly(
     """
     Takes a MARCXML file.
     Pulls out transliterated field (880) and pairs them
-    Creates dataframe according to reformatter_type
+    Applies filtering and exclusions
     Save dataframe to output directory
     """
     log_level = log_level.upper()
