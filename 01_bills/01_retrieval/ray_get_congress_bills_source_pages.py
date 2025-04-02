@@ -1,13 +1,22 @@
-#!/usr/bin/env python3
-
+import os
 import typer
+import ray
 import logging
 
 from typing_extensions import Annotated
-from pathlib import Path
-from utils.fetch_store import (
-    fetch_and_store_congress_bills_source_pages,
-)
+
+logger = logging.getLogger("ray")
+logger.setLevel(logging.DEBUG)
+
+
+@ray.remote(num_cpus=1)
+def ray_wrapper(log_level: str, **kwargs):
+    from utils.fetch_store import (
+        fetch_and_store_congress_bills_source_pages,
+    )
+
+    logger.debug(f"Running fetch_and_store_congress_bills_source_pages")
+    fetch_and_store_congress_bills_source_pages(**kwargs)
 
 
 def get_congress_bills_source_pages(
@@ -24,9 +33,12 @@ def get_congress_bills_source_pages(
     congress: Annotated[
         int, typer.Option(help="Congress to fetch and store bill pages for")
     ] = 111,
-    output_directory: Annotated[
-        Path, typer.Option(help="Location to store the pages fetched from the API.")
-    ] = Path("../local_data/source_pages"),
+    output_location: Annotated[
+        str,
+        typer.Option(
+            help="Location to store the pages fetched from the API. Must be a s3 url."
+        ),
+    ] = "s3://loc-responsible-datasets-source-data/01_bills/source_pages",
     page_limit: Annotated[
         int, typer.Option(help="Number of bills in each page, max: 250")
     ] = 250,
@@ -41,29 +53,18 @@ def get_congress_bills_source_pages(
         ),
     ] = "INFO",
 ):
-    """
-    Local CLI Wrapper for the `fetch_and_store_congress_bills_source_pages` function.
+    ray.init()
 
-    """
-    log_level = log_level.upper()
-    level_enum = getattr(logging, log_level, None)
-    if not isinstance(level_enum, int):
-        raise typer.BadParameter(f"Invalid log level: {log_level}")
-    logging.basicConfig(
-        level=level_enum,
-        format="%(asctime)s - %(name)s.%(funcName)s:%(lineno)d - %(levelname)s - %(message)s",
-    )
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-    fetch_and_store_congress_bills_source_pages(
+    result = ray_wrapper.remote(
         api_url=api_url,
         api_key=api_key,
         congress=congress,
-        output_directory=output_directory,
+        output_location=output_location,
         page_limit=page_limit,
         overwrite=overwrite,
+        log_level=log_level,
     )
+    ray.get(result)
 
 
 if __name__ == "__main__":

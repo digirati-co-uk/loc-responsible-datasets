@@ -1,6 +1,6 @@
 # 03_Profiling
 
-This directory holds the code for initial exploratory data analysis (general data profiling) and imbalance quantification (stastical profiling), as well as quanitfication of imbalance post mitigation.
+This directory holds the code for initial exploratory data analysis (general data profiling) and imbalance quantification (statistical profiling), as well as quantification of imbalance post mitigation.
 
 
 ### Pre-mitigation Profiling

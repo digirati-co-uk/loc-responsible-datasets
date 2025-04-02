@@ -12,6 +12,17 @@ json_headers = {
 
 logger = logging.getLogger(__name__)
 
+logger = logging.getLogger("ray")
+logger.setLevel(logging.DEBUG)
+
+BILL_SUBFIELDS = {
+    "subjects": "subjects",
+    "summaries": "summaries",
+    "textVersions": "text",
+}
+TEXT_SUBFIELD = "textVersions"
+TEXT_TYPES = ["Formatted Text", "Formatted XML"]
+
 
 class LoCBillsAPI(object):
     def __init__(self, api_url, api_key):
