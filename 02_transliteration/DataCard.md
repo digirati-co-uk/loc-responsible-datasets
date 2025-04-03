@@ -20,10 +20,10 @@ An example of the dataframe is as follows:
 | lccn     | field | subfield | original_script               | transliterated_text                        | 
 | :---:    | :---: | :---:    | :---:                         | :---:                                      | 
 | 98840563 | 245   | a        |`「飮用井戶使用実態調查」 報告書 /` | `"Inʾyō ido shiyō jittai chōsa" hōkokusho /` |
-| 98840563 | 245   | c        |`[編集東京都衛生局生活環境部環境指導課]`.| `\[henshū Tōkyō-to Eiseikyoku Seikatsu Kankyōbu ...`|
-| 86129343 | 710   | a        |`労働福祉事業団 (Japan)`.| `Rōdō Fukushi Jigyōdan (Japan)`|
-| 86129343 | 100   | a        |`山崎正一,`.| `Yamazaki, Masakazu,`|
-| 86129343 | 245   | a        |`山崎正一全集.`.| `Yamazaki Masakazu zenshū.`|
+| 98840563 | 245   | c        |`[編集東京都衛生局生活環境部環境指導課].`| `[henshū Tōkyō-to Eiseikyoku Seikatsu Kankyōbu ...`|
+| 86129343 | 710   | a        |`労働福祉事業団 (Japan)` | `Rōdō Fukushi Jigyōdan (Japan)`|
+| 86129343 | 100   | a        |`山崎正一,` | `Yamazaki, Masakazu,`|
+| 86129343 | 245   | a        |`山崎正一全集.` | `Yamazaki Masakazu zenshū.`|
 
 ### Data Fields
 | Field               | Description |
