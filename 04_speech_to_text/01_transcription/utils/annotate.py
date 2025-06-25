@@ -8,9 +8,7 @@ import json
 import spacy
 from spacy.tokens import Token, Doc
 from spacy.training import iob_to_biluo
-from flair.models import SequenceTagger
-from flair.data import Sentence
-from flair.splitter import SentenceSplitter
+
 logger = logging.getLogger(__name__)
 
 
@@ -41,23 +39,6 @@ def flatten_json(json_data, norm_ws=False):
         flattened_text = " ".join(flattened_text.split())
     return flattened, flattened_text
 
-
-def flair_annotator(text: str):
-    """
-    Annotate text using Flair's NER model.
-
-    Args:
-        text (str): The text to annotate.
-
-    Returns:
-        list: A list of entities recognized in the text.
-    """
-
-
-    tagger = SequenceTagger.load("flair/ner-english")
-    sentence = Sentence(text)
-    tagger.predict(sentence)
-    return sentence.get_spans("ner")
 
 def annotate_transcription(
     json_file: Path,
