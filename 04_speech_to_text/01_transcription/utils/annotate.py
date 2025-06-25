@@ -8,6 +8,7 @@ import json
 import spacy
 from spacy.tokens import Token, Doc
 from spacy.training import iob_to_biluo
+from spacy_whisper import SpacyWhisper
 
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ def annotate_transcription(
     json_file: Path,
     output_file: Path,
     model: str = "en_core_web_trf",
+    spacy_whisper: bool = True
 ):
     """
     Annotate the transcribed text with entities and (optional) timestamps.
@@ -54,23 +56,29 @@ def annotate_transcription(
         model (str): Spacy model to use for entity recognition.
     """
     try:
-        nlp = spacy.load(model)
         with open(json_file, "r", encoding="utf-8") as f:
             json_data = json.load(f)
-        flattened, plaintext = flatten_json(json_data)
-        # Set the extensions for start and end times on the Token class
-        # This allows us to store custom attributes on tokens
-        Token.set_extension("start_time", default=None, force=True)
-        Token.set_extension("end_time", default=None, force=True)
-        # Add the words to the Doc object
-        doc = Doc(nlp.vocab, words=[item["text"] for item in flattened])
-        # run the NLP pipeline on the doc
-        doc = nlp(doc)
-        # iterate the tokens and set the start and end times
-        # as custom attributes of those tokens
-        for i, token in enumerate(doc):
-            token._.end_time = int(flattened[i]["end_time"])
-            token._.start_time = int(flattened[i]["start_time"])
+        if spacy_whisper:
+            sw = SpacyWhisper(lang="en", model=model, segments_key="segments", word_level=True)
+            doc = sw.create_doc(json_data)
+        else:
+            # I wrote this code before I knew about spacy-whisper
+            # which does the same thing, but slightly better.
+            nlp = spacy.load(model)
+            flattened, plaintext = flatten_json(json_data)
+            # Set the extensions for start and end times on the Token class
+            # This allows us to store custom attributes on tokens
+            Token.set_extension("start_time", default=None, force=True)
+            Token.set_extension("end_time", default=None, force=True)
+            # Add the words to the Doc object
+            doc = Doc(nlp.vocab, words=[item["text"] for item in flattened])
+            # run the NLP pipeline on the doc
+            doc = nlp(doc)
+            # iterate the tokens and set the start and end times
+            # as custom attributes of those tokens
+            for i, token in enumerate(doc):
+                token._.end_time = int(flattened[i]["end_time"])
+                token._.start_time = int(flattened[i]["start_time"])
         # Convert the doc to a list of dictionaries with text and entity info
         annotated_data = []
         # Get the entities in BILOU format
@@ -85,7 +93,6 @@ def annotate_transcription(
                 for token in doc
             ]
         )
-        print(f"Length of doc: {len(doc)}")
         for i, token in enumerate(doc):
             if token.ent_iob_ != "O" and token.ent_type_ != "O":
                 suffix = f"-{token.ent_type_}"
