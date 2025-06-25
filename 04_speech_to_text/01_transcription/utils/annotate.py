@@ -9,6 +9,7 @@ import spacy
 from spacy.tokens import Token, Doc
 from spacy.training import iob_to_biluo
 
+
 logger = logging.getLogger(__name__)
 
 
