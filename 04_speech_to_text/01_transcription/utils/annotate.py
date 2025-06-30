@@ -13,6 +13,15 @@ from spacy_whisper import SpacyWhisper
 
 logger = logging.getLogger(__name__)
 
+permitted_entities = [
+    "PERSON",
+    "ORG",
+    "GPE",
+    "LOC",
+    "FAC",
+    "NORP"
+
+]
 
 def flatten_json(json_data, norm_ws=False):
     """
@@ -79,6 +88,9 @@ def annotate_transcription(
             for i, token in enumerate(doc):
                 token._.end_time = int(flattened[i]["end_time"])
                 token._.start_time = int(flattened[i]["start_time"])
+
+
+
         # Convert the doc to a list of dictionaries with text and entity info
         annotated_data = []
         # Get the entities in BILOU format
@@ -109,6 +121,15 @@ def annotate_transcription(
                     "bilou": entity_bilou,
                 }
             )
+        # Iterate the annotated data and if the entity type is not in the permitted entities,
+        # set the entity type to "O" (outside)
+        for item in annotated_data:
+            if item["iob"] != "O" and item["bilou"] != "O":
+                entity_type = item["iob"].split("-")[-1]
+                if entity_type not in permitted_entities:
+                    item["iob"] = "O"
+                    item["bilou"] = "O"
+
         # Write the annotated data to the output file
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(annotated_data, f, ensure_ascii=False, indent=4)
