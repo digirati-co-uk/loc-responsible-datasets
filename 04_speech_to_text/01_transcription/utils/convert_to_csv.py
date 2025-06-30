@@ -5,6 +5,7 @@ from pathlib import Path
 import urllib.parse
 import shutil
 import os
+import string
 
 json_root = "../../../local_data/04_speech_to_text/source_txt/"
 audio_root = "../../../local_data/04_speech_to_text/source_audio/"
@@ -87,6 +88,68 @@ def convert_json_to_csv(json_file, output_directory):
             shutil.copy2(audio_file, web_audio_filepath)
 
 
+def convert_json_to_xml(json_file, output_directory):
+    """
+    Convert a JSON file to an XML file.
+    :param json_file: Path to the input JSON file.
+    :param output_directory: Path to the output XML file.
+    """
+    # Create a filename for the output CSV file
+    file_root = [p.name for p in Path(json_file).parents][1::-1]
+    output_file = (
+            Path(output_directory)
+            / file_root[0]
+            / file_root[1]
+            / Path(json_file).with_suffix(".xml").name
+    )
+    web_file_path = Path(
+        urllib.parse.quote(str(output_file).replace(" ", "_"), safe="/")
+    )
+    # Split the iob column into separate columns,
+    # the column contains either an O or a B-XXX, I-XXX, L-XXX, U-XXX
+    with open(json_file, "r", encoding="utf-8") as f:
+        data = pd.read_json(f)
+    iob_columns = data["iob"].str.split("-", expand=True)
+    iob_columns.columns = ["iob", "entity_type"]
+    # remove iob from this iob_columns
+    iob_columns = iob_columns.drop(columns=["iob"])
+    data = pd.concat([data, iob_columns], axis=1)
+    # Convert to XML
+    entity_text = []
+    current_entity = None
+
+    for index, row in data.iterrows():
+        iob_value = row["iob"]
+        if iob_value.startswith("B-"):
+            if current_entity:  # N.B. if a current entity already exists, current_text will not be empty
+                entity_text.append(f"<{current_entity}>{' '.join(current_text)}</{current_entity}>")
+            current_entity = row["entity_type"]
+            current_text = [row["text"]]
+        elif iob_value.startswith("I-") and current_entity == row["entity_type"]:
+            current_text.append(row["text"])
+        else:
+            if current_entity:
+                entity_text.append(f"<{current_entity}>{' '.join(current_text)}</{current_entity}>")
+                current_entity = None
+            entity_text.append(row["text"])
+
+    if current_entity:
+        entity_text.append(f"<{current_entity}>{' '.join(current_text)}</{current_entity}>")
+    # Save the XML file concatenate the text column into a single string
+    # separated by spaces and wrapped in a root tag. N.B.
+    # no specific namespace is used, so this is a simple XML file.
+    xml_content = "<TRANSCRIPTION>\n"
+    xml_content +=  " ".join(entity_text)
+    # Normalize whitespace, by replacing spces before punctuation
+    # but do not replace spaces before < or > as these are XML tags
+    for punct in string.punctuation:
+        if punct not in ["<", ">"]:
+            xml_content =  xml_content.replace(f" {punct}", punct)
+    xml_content = xml_content.replace(" n't", "n't").replace(" 's", "'s")
+    xml_content += "\n</TRANSCRIPTION>"
+    with open(web_file_path, "w", encoding="utf-8") as f:
+        f.write(xml_content)
+
 
 
 if __name__ == "__main__":
@@ -94,3 +157,4 @@ if __name__ == "__main__":
     curran = [x for x in json_files if "curran" in x.lower()]
     for json_file in json_files:
         convert_json_to_csv(json_file, destination)
+        convert_json_to_xml(json_file, destination)

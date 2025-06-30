@@ -35,9 +35,10 @@ def apply_transcriber(
     )
     # Get all files and filter for audio files (case insensitive)
     all_files = list(audio_root.rglob("*.*"))
-    audio_files = [f for f in all_files if f.suffix.lower() in ('.wav', '.mp3')]
+    audio_files = [f for f in all_files if f.suffix.lower() in ('.mp3') and "DS_Store" not in f.name]
+    # Just process the MP3s as there were some WAVs which were converted to MP3s already
+    # so reprocessing them would be redundant.
     for file in tqdm(audio_files):
-        logging.info(f"Processing audio file: {file}")
         txt_file_name = file.with_suffix(".txt").name
         json_file_name = file.with_suffix(".json").name
         grandparent_dir = file.parent.parent.name
@@ -47,7 +48,6 @@ def apply_transcriber(
         txt_output_path = txt_file_dir /grandparent_dir/ parent_dir / txt_file_name
         json_output_path = txt_file_dir / grandparent_dir / parent_dir / json_file_name
         convert_audio_to_text(file, textfile_path=txt_output_path, jsonfile_path=json_output_path)
-
 
 if __name__ == "__main__":
     typer.run(apply_transcriber)

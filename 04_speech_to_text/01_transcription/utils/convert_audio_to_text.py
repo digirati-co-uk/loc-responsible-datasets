@@ -9,13 +9,18 @@ logger = logging.getLogger(__name__)
 def convert_audio_to_text(audio_file_path: Path ,
                           textfile_path: Path,
                           jsonfile_path: Path,
-                          model="mlx-community/whisper-large-v3-turbo"):
+                          model="mlx-community/whisper-large-v3-turbo",
+                          ):
     """
     Convert audio file to text using the specified model.
 
     Args:
         audio_file_path (str): Path to the audio file.
-        model: The model to use for transcription.
+        textfile_path (Path): Path to save the transcribed text file.
+        jsonfile_path (Path): Path to save the transcription in JSON format. This is the
+            output of the MLX Whisper transcriber, which includes word timestamps.
+        model: The model to use for transcription. For the version run locally,
+            we used an MLX version, for faster performance on an Apple Silicon Mac.
 
     Returns:
         str: Transcribed text from the audio file.
@@ -26,6 +31,7 @@ def convert_audio_to_text(audio_file_path: Path ,
             path_or_hf_repo=model,
             language="en",
             word_timestamps=True,
+            condition_on_previous_text=False
         )
         # make parent directories if they do not exist
         textfile_path.parent.mkdir(parents=True, exist_ok=True)
@@ -42,5 +48,6 @@ def convert_audio_to_text(audio_file_path: Path ,
 
 
 if __name__ == "__main__":
+    # Example usage
     output = convert_audio_to_text("../../IwoJima_CombatRec_Josephy.wav")
     print(json.dumps(output, indent=2, ensure_ascii=False))
