@@ -19,8 +19,10 @@ permitted_entities = [
     "GPE",
     "LOC",
     "FAC",
-    "NORP"
-
+    "NORP",
+    "DATE",
+    "EVENT",
+    "QUANTITY",
 ]
 
 def flatten_json(json_data, norm_ws=False):
