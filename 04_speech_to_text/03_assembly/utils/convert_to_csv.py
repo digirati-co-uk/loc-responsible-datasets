@@ -7,6 +7,7 @@ import os
 import string
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -102,7 +103,7 @@ def convert_json_to_xml(json_file, output_directory):
     :param json_file: Path to the input JSON file.
     :param output_directory: Path to the output XML file.
     """
-    # Create a filename for the output CSV file
+    # Create a filename for the output XML file
     file_root = [p.name for p in Path(json_file).parents][1::-1]
     output_file = (
         Path(output_directory)
@@ -165,3 +166,67 @@ def convert_json_to_xml(json_file, output_directory):
     xml_content += "\n</TRANSCRIPTION>"
     with open(web_file_path, "w", encoding="utf-8") as f:
         f.write(xml_content)
+
+
+def redact_entities(json_file, redacted_types=("PERSON", "ORGANIZATION"),
+                    redaction_text="REDACTED", redaction_type="text",
+                    overwrite=False, wrapper="[]"):
+    """
+    Redact entities in a JSON file using simple methods.
+
+    The JSON file should then be independently converted to CSV or XML
+    in the same manner as the original non-redacted file(s)
+
+    :param json_file: Path to the input JSON file.
+    :param redacted_types: Tuple of entity types to redact. Defaults to ("PERSON", "ORGANIZATION").
+    :return: None
+    """
+    with open(json_file, "r", encoding="utf-8") as f:
+        data = pd.read_json(f)
+    iob_columns = data["iob"].str.split("-", expand=True)
+    iob_columns.columns = ["iob", "entity_type"]
+    # Combine the original data with the new iob columns
+    iob_columns = iob_columns.drop(columns=["iob"])
+    data = pd.concat([data, iob_columns], axis=1)
+    # Redact the entities
+    if redaction_type == "text":
+        # Replace the text of the redacted entities with the redaction text
+        data["text"] = data.apply(
+            lambda row: row["text"]
+            if row["entity_type"] not in redacted_types
+            else f"{wrapper[0]}{redaction_text}{wrapper[1]}",
+            axis=1,
+        )
+    elif redaction_type == "type":
+        # Remove the rows with the redacted entity types
+        data["text"] = data.apply(
+            lambda row: row["text"]
+            if row["entity_type"] not in redacted_types
+            else f"{wrapper[0]}{row["entity_type"]}{wrapper[1]}",
+            axis=1,
+        )
+    else:
+        raise ValueError("Invalid redaction type. Use 'text' or 'remove'.")
+
+
+    # Save the redacted data back to the JSON file
+    if overwrite:
+        with open(json_file, "w", encoding="utf-8") as f:
+            data.to_json(f, orient="records", force_ascii=False, indent=2)
+    else:
+        # Save to a new file with "_redacted" suffix
+        # replace _annotated.json with _annotated_redacted.json
+        redacted_file = (
+            json_file.with_name(
+                json_file.stem.replace("_annotated", "_annotated_redacted")
+            )
+            .with_suffix(".json")
+        )
+        with open(redacted_file, "w", encoding="utf-8") as f:
+            data.to_json(f, orient="records", force_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    redacted_types = ("PERSON", "ORGANIZATION")
+    redact_entities(json_file=Path("../../../local_data/04_speech_to_text/source_txt/minnesota_starvation_transcripts/Carlyle Frederick Interview 8.2.03/Frederick_1_annotated.json"),
+                    redaction_type="type",)

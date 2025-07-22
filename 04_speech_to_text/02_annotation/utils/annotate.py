@@ -90,9 +90,6 @@ def annotate_transcription(
             for i, token in enumerate(doc):
                 token._.end_time = int(flattened[i]["end_time"])
                 token._.start_time = int(flattened[i]["start_time"])
-
-
-
         # Convert the doc to a list of dictionaries with text and entity info
         annotated_data = []
         # Get the entities in BILOU format
